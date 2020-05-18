@@ -15,6 +15,9 @@ repositories {
 }
 
 dependencies {
+    implementation 'com.github.pagehelper:pagehelper:5.1.11'
+    implementation 'com.github.jsqlparser:jsqlparser:3.1'
+    implementation 'org.freemarker:freemarker:2.3.30'
     implementation 'org.springframework.boot:spring-boot-starter-undertow'
     implementation('org.springframework.boot:spring-boot-starter-web') {
         exclude module: 'spring-boot-starter-tomcat'
