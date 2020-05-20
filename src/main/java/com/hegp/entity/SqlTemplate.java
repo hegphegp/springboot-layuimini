@@ -22,6 +22,7 @@ public class SqlTemplate extends IdEntity {
     private String pageIndexField;
     private String pageSizeField;
     private String totalPageField;
+    private Boolean pagination; // 是否是分页接口
     @Column(length = 10240)
     private String params;
     private Boolean useMock=false;
@@ -96,6 +97,14 @@ public class SqlTemplate extends IdEntity {
 
     public void setTotalPageField(String totalPageField) {
         this.totalPageField = totalPageField;
+    }
+
+    public Boolean getPagination() {
+        return pagination;
+    }
+
+    public void setPagination(Boolean pagination) {
+        this.pagination = pagination;
     }
 
     public String getParams() {

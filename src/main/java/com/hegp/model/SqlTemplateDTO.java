@@ -19,6 +19,7 @@ public class SqlTemplateDTO {
     private String pageIndexField;
     private String pageSizeField;
     private String totalPageField;
+    private Boolean pagination;
     private List<Param> params;
     private Boolean useMock;
     private Map<String,Object> mockData;
@@ -99,6 +100,14 @@ public class SqlTemplateDTO {
 
     public void setTotalPageField(String totalPageField) {
         this.totalPageField = totalPageField;
+    }
+
+    public Boolean getPagination() {
+        return pagination;
+    }
+
+    public void setPagination(Boolean pagination) {
+        this.pagination = pagination;
     }
 
     public List<Param> getParams() {
