@@ -2,6 +2,7 @@
 <html>
     
 <head>
+    <meta charset="UTF-8">
     <title>ztree高级 增 / 删 / 改 / 移动 节点</title>
     <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/zTree.v3/3.5.40/css/zTreeStyle/zTreeStyle.css" type="text/css">
     <link rel="stylesheet" href="https://www.layuicdn.com/layui-v2.5.6/css/layui.css" type="text/css">
@@ -13,8 +14,8 @@
             margin-top: 10px;
             border: 1px solid #617775;
             background: #f0f6e4;
-            width:300px;
-            height:360px;
+            /*width:300px;*/
+            /*height:360px;*/
             overflow-y:scroll;
             overflow-x:auto;
         }
@@ -169,7 +170,20 @@
 
 <body>
 <div>
-    <ul id="treeDemo" class="ztree"></ul>
+    <div class="layui-row">
+        <div class="layui-col-xs2 layui-col-sm2 layui-col-md2 layui-col-lg2" style="padding-left: 5px;">
+            <ul id="treeDemo" class="ztree"></ul>
+        </div>
+        <div class="layui-col-xs4 layui-col-sm4 layui-col-md4 layui-col-lg4">
+            <div class="grid-demo">4/12</div>
+        </div>
+        <div class="layui-col-xs3 layui-col-sm3 layui-col-md3 layui-col-lg3">
+            <div class="grid-demo grid-demo-bg1">3/12</div>
+        </div>
+        <div class="layui-col-xs3 layui-col-sm3 layui-col-md3 layui-col-lg3">
+            <div class="grid-demo">3/12</div>
+        </div>
+    </div>
 </div>
 </body>
 

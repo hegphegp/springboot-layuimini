@@ -1,1 +1,36 @@
+spring:
+  application:
+    name: hgp-admin
+  datasource:
+    username: root
+    password: icityDB2018!@#
+    url: jdbc:postgresql://192.168.4.151:5432/icity
+    driver-class-name: org.postgresql.Driver
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      max-lifetime: 1830000
+      maximum-pool-size: 10
+  jpa:
+    database: postgresql
+    show-sql: false
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        enable_lazy_load_no_trans: true
+        temp.use_jdbc_metadata_defaults: false
+  jackson.serialization.write-dates-as-timestamps: true
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+  redis:
+    database: 0
+    host: 192.168.4.151
+    port: 6379
+    password: icityRedis2020!@#
+    timeout: 5000ms
+
+service.base-url.prefix: /v1/service
 
