@@ -17,7 +17,6 @@ repositories {
 dependencies {
     implementation 'com.github.wenhao:jpa-spec:3.2.4'
     implementation 'org.postgresql:postgresql:42.2.12'
-    implementation 'com.github.pagehelper:pagehelper:5.1.11'
     implementation 'com.github.jsqlparser:jsqlparser:3.1'
     implementation 'org.freemarker:freemarker:2.3.30'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
