@@ -20,6 +20,7 @@ public class IdEntity implements Idable<String>, Serializable {
     private Timestamp updateAt;
     private String createBy;
     private String updateBy;
+    private Boolean del = false;
     public IdEntity() { }
 
     @Override
@@ -61,5 +62,13 @@ public class IdEntity implements Idable<String>, Serializable {
 
     public void setUpdateBy(String updateBy) {
         this.updateBy = updateBy;
+    }
+
+    public Boolean getDel() {
+        return del;
+    }
+
+    public void setDel(Boolean del) {
+        this.del = del;
     }
 }

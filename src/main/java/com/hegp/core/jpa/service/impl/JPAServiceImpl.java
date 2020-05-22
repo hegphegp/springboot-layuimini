@@ -1,12 +1,19 @@
 package com.hegp.core.jpa.service.impl;
 
+import com.github.wenhao.jpa.Specifications;
+import com.hegp.core.exception.ResourcesNotFoundException;
+import com.hegp.core.jpa.entity.IdEntity;
 import com.hegp.core.jpa.service.JPAService;
+import org.hibernate.metamodel.internal.MetamodelImpl;
+import org.hibernate.persister.entity.EntityPersister;
+import org.hibernate.persister.entity.SingleTableEntityPersister;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.ResolvableType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -16,7 +23,7 @@ import javax.persistence.metamodel.EntityType;
 import java.util.*;
 
 @Transactional(readOnly = true)
-public class JPAServiceImpl<T, ID> implements JPAService<T, ID>, ApplicationContextAware {
+public class JPAServiceImpl<T extends IdEntity, ID> implements JPAService<T, ID>, ApplicationContextAware {
     public EntityManager entityManager;
     public SimpleJpaRepository<T, ID> simpleJpaRepository;
     public ApplicationContext applicationContext;
@@ -27,12 +34,26 @@ public class JPAServiceImpl<T, ID> implements JPAService<T, ID>, ApplicationCont
         this.applicationContext = applicationContext;
         synchronized (JPAServiceImpl.class) {
             if (simpleJpaRepositoryMap.size()==0) {
-                Map<String, EntityManager> map = applicationContext.getBeansOfType(EntityManager.class);
-                for (String key : map.keySet()) {
-                    Set<EntityType<?>> set = map.get(key).getMetamodel().getEntities();
+                Collection<EntityManager> entityManagers = applicationContext.getBeansOfType(EntityManager.class).values();
+                for (EntityManager entityManager : entityManagers) {
+                    // 参考了 https://blog.csdn.net/g_lfei/article/details/81776083 的逻辑, 根据Java类获取对应数据库的表名
+                    // entityClass的class与tableName的映射
+                    MetamodelImpl metamodelImpl = (MetamodelImpl)entityManager.getMetamodel();
+                    Map<String, EntityPersister> persisterMap = metamodelImpl.entityPersisters();
+                    for(Map.Entry<String, EntityPersister> entity : persisterMap.entrySet()) {
+                        Class targetClass = entity.getValue().getMappedClass();
+                        SingleTableEntityPersister persister = (SingleTableEntityPersister) entity.getValue();
+//                        String entityName = targetClass.getSimpleName();//Entity的名称
+//                        String tableName = persister.getTableName();//Entity对应的表的英文名
+//                        System.out.println("类名：" + targetClass + " => 表名：" + persister.getTableName());
+                        entityClassTableNameMap.put(targetClass, persister.getTableName());
+                    }
+
+                    // entityClass的class与entityManager的映射
+                    Set<EntityType<?>> set = entityManager.getMetamodel().getEntities();
                     for (EntityType entityType : set) {
-                        entityManagerMap.put(entityType.getJavaType(), map.get(key));
-                        simpleJpaRepositoryMap.put(entityType.getJavaType(), new SimpleJpaRepository(entityType.getJavaType(), map.get(key)));
+                        entityManagerMap.put(entityType.getJavaType(), entityManager);
+                        simpleJpaRepositoryMap.put(entityType.getJavaType(), new SimpleJpaRepository(entityType.getJavaType(), entityManager));
                     }
                 }
             }
@@ -53,7 +74,9 @@ public class JPAServiceImpl<T, ID> implements JPAService<T, ID>, ApplicationCont
     @Override
     public T find(ID id) {
         Assert.notNull(id, "id must not be null!");
-        Optional<T> optional = simpleJpaRepository.findById(id);
+        Specification specification = Specifications.and().eq("id", id).eq("del", false).build();
+        Optional<T> optional = simpleJpaRepository.findOne(specification);
+//        Optional<T> optional = simpleJpaRepository.findById(id);
         return optional.isPresent()? optional.get():null;
     }
 
@@ -61,6 +84,7 @@ public class JPAServiceImpl<T, ID> implements JPAService<T, ID>, ApplicationCont
     @Transactional
     public T save(T entity) {
         Assert.notNull(entity, "entity must not be null!");
+        entity.setDel(false);
         return simpleJpaRepository.save(entity);
     }
 
@@ -68,6 +92,9 @@ public class JPAServiceImpl<T, ID> implements JPAService<T, ID>, ApplicationCont
     @Transactional
     public List<T> save(T[] entities) {
         Assert.notNull(entities, "entities must not be null!");
+        for (T item:entities) {
+            item.setDel(false);
+        }
         return simpleJpaRepository.saveAll(Arrays.asList(entities));
     }
 
@@ -75,6 +102,9 @@ public class JPAServiceImpl<T, ID> implements JPAService<T, ID>, ApplicationCont
     @Transactional
     public List<T> save(List<T> entities) {
         Assert.notNull(entities, "entities must not be null!");
+        for (T item:entities) {
+            item.setDel(false);
+        }
         return simpleJpaRepository.saveAll(entities);
     }
 
@@ -89,35 +119,38 @@ public class JPAServiceImpl<T, ID> implements JPAService<T, ID>, ApplicationCont
     @Transactional
     public void delete(T[] entities) {
         Assert.notNull(entities, "entities must not be null!");
-        simpleJpaRepository.deleteInBatch(Arrays.asList(entities));
+        delete(Arrays.asList(entities));
     }
 
     @Override
     @Transactional
     public void delete(List<T> entities) {
-        simpleJpaRepository.deleteInBatch(entities);
+        for (T item:entities) {
+            item.setDel(true);
+        }
+        simpleJpaRepository.saveAll(entities);
     }
 
     @Override
     @Transactional
     public void deleteById(ID id) {
-        simpleJpaRepository.deleteById(id);
+        T entity = Optional.of(find(id)).orElseThrow(new ResourcesNotFoundException());
+        entity.setDel(true);
+        simpleJpaRepository.save(entity);
     }
 
     @Override
     @Transactional
     public void deleteById(ID[] ids) {
         Assert.notNull(ids, "Ids must not be null!");
-        List<T> entities = simpleJpaRepository.findAllById(Arrays.asList(ids));
-        simpleJpaRepository.deleteInBatch(entities);
+        deleteById(Arrays.asList(ids));
     }
 
     @Override
     @Transactional
     public void deleteById(List<ID> ids) {
         Assert.notNull(ids, "Ids must not be null!");
-        List<T> entities = simpleJpaRepository.findAllById(ids);
-        simpleJpaRepository.deleteInBatch(entities);
+        delete(simpleJpaRepository.findAllById(ids));
     }
 
     @Override

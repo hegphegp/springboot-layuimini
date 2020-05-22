@@ -15,6 +15,7 @@ repositories {
 }
 
 dependencies {
+    implementation 'cn.hutool:hutool-all:5.3.5'
     implementation 'com.github.wenhao:jpa-spec:3.2.4'
     implementation 'org.postgresql:postgresql:42.2.12'
     implementation 'com.github.pagehelper:pagehelper:5.1.11'

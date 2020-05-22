@@ -8,7 +8,6 @@ import com.hegp.model.SqlTemplateDTO;
 import com.hegp.service.SqlTemplateService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -30,15 +29,9 @@ public class SqlTemplateController extends BaseValidate {
     public Result creteTreeItem(@RequestBody SqlTemplateDTO sqlTemplateDTO) {
         checkParams(sqlTemplateDTO, "name");
         SqlTemplate sqlTemplate = new SqlTemplate();
-        String parentId = sqlTemplateDTO.getParentId();
-        if (StringUtils.hasText(parentId)) {
-            Optional.of(sqlTemplateService.find(parentId)).orElseThrow(new ResourcesNotFoundException("父级不存在或者已删除"));
-            sqlTemplate.setParentId(parentId);
-        }
+        sqlTemplate.setParentId(sqlTemplateDTO.getParentId());
         sqlTemplate.setName(sqlTemplateDTO.getName());
-        sqlTemplate.setDel(false);
         sqlTemplate.setUseMock(false);
-        sqlTemplate.setOrderNo(sqlTemplateService.queryNextOrderNo());
         sqlTemplateService.save(sqlTemplate);
         return Result.success(sqlTemplate.getId());
     }
@@ -68,6 +61,16 @@ public class SqlTemplateController extends BaseValidate {
         SqlTemplateDTO sqlTemplateDTO = new SqlTemplateDTO();
         BeanUtils.copyProperties(sqlTemplate, sqlTemplateDTO, "params", "mockData");
         return Result.success(sqlTemplateDTO);
+    }
+
+    // 在树状结构添加节点
+    @GetMapping("/sql-template/{id}/{action}")
+    public Result<SqlTemplate> querySqlTemplateDetail(@PathVariable String id, @PathVariable String action) {
+        SqlTemplate sqlTemplate = Optional.of(sqlTemplateService.find(id)).orElseThrow(new ResourcesNotFoundException("该数据不存在或者已删除, 请刷新整个页面"));
+        if ("small".equals(action)) {
+            return Result.success(sqlTemplateService.queryLessOne(sqlTemplate));
+        }
+        return Result.success(sqlTemplateService.queryGreaterOne(sqlTemplate));
     }
 
     /**

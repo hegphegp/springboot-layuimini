@@ -1,6 +1,6 @@
 package com.hegp.entity;
 
-import com.hegp.core.jpa.entity.IdEntity;
+import com.hegp.core.jpa.entity.TreeEntity;
 
 import javax.persistence.*;
 
@@ -12,7 +12,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "gs_sql_template",
        indexes={@Index(name="gs_sql_template_order_no_index", columnList="orderNo", unique=false)})
-public class SqlTemplate extends IdEntity {
+public class SqlTemplate extends TreeEntity {
     private String name;
     private String method; // http的method
     private String description;
@@ -29,9 +29,6 @@ public class SqlTemplate extends IdEntity {
     // mock数据允许保存50K
     @Column(length = 51200)
     private String mockData;
-    private String parentId;
-    private Long orderNo;
-    private Boolean del = false;
 
     public SqlTemplate() { }
 
@@ -131,27 +128,4 @@ public class SqlTemplate extends IdEntity {
         this.mockData = mockData;
     }
 
-    public String getParentId() {
-        return parentId;
-    }
-
-    public void setParentId(String parentId) {
-        this.parentId = parentId;
-    }
-
-    public Long getOrderNo() {
-        return orderNo;
-    }
-
-    public void setOrderNo(Long orderNo) {
-        this.orderNo = orderNo;
-    }
-
-    public Boolean getDel() {
-        return del;
-    }
-
-    public void setDel(Boolean del) {
-        this.del = del;
-    }
 }

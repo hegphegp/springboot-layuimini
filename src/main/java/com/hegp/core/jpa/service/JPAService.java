@@ -1,5 +1,6 @@
 package com.hegp.core.jpa.service;
 
+import com.hegp.core.jpa.entity.IdEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
@@ -9,9 +10,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public interface JPAService<T, ID> {
+public interface JPAService<T extends IdEntity, ID> {
     Map<Class, EntityManager> entityManagerMap = new HashMap<>();
     Map<Class, SimpleJpaRepository> simpleJpaRepositoryMap = new HashMap<>();
+    Map<Class, String> entityClassTableNameMap = new HashMap<>();
 
     T find(ID id);
 

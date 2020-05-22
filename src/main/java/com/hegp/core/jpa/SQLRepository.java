@@ -66,7 +66,8 @@ public class SQLRepository {
     public Long queryResultCount(String sql, Object... params) {
         Query countQuery = entityManager.createNativeQuery(sql);
         assemblyParam(countQuery, params);
-        return Long.parseLong(countQuery.getSingleResult().toString());
+        Object object = countQuery.getSingleResult();
+        return object!=null? Long.parseLong(object.toString()):0L;
     }
 
     /** 执行修改语句，返回受影响行数 */
