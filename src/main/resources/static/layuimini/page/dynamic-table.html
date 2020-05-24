@@ -67,7 +67,7 @@
 <textarea name="content" id="demo" placeholder="请输入SQL语句，该模板由freemarker模板引擎解析" class="layui-textarea" lay-verify="content" rows="20" style="margin-top: 10px;"></textarea>
 <script src="https://www.layuicdn.com/layui-v2.5.6/layui.all.js" charset="utf-8"></script>
 <!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
- 
+
 <script>
     layui.use(['table', 'layer', 'element', 'jquery', 'form'], function (table, layer, element, $, form) {
         var jsonData = [
@@ -77,14 +77,14 @@
             { id: 3, location: 'path' },
             { id: 4, location: 'path' },
         ];
- 
+
         // layui.form.render('select','methodSelect');
         var check = 0;
         //监听单元格编辑
         table.on('edit(grid)', function(obj) {
             var value = obj.value //得到修改后的值
-            ,data = obj.data      //得到所在行所有键值
-            ,field = obj.field;   //得到字段
+                ,data = obj.data      //得到所在行所有键值
+                ,field = obj.field;   //得到字段
             check++;
             if (check%2==0) { // 表示校验通过
 
@@ -93,7 +93,7 @@
                 oldValue = $(this).prev().text(); //得到修改前的值
                 $(".layui-table-edit").val(oldValue);
             }
-            
+
             // var regExp = 正则表达式自己写;
             // if(regExp.test(value) || value==""){
             //     // $.post('{:url(\'setLocalIp\')}',{name:data.name,param:field,v:value},function(data){
@@ -110,7 +110,7 @@
         });
 
         // 监听修改update到表格中
-        form.on('select(selectPageParamType)', function (data) {
+        form.on('select(selectLocation)', function (data) {
             var elem = $(data.elem);
             var trElem = elem.parents('tr');
             var tableData = table.cache['grid'];
@@ -136,15 +136,6 @@
             tableData[trElem.data('index')][elem.attr('name')] = data.value;
             // 其他的操作看需求 TODO
         });
-        // 监听修改update到表格中
-        form.on('select(selectLocation)', function (data) {
-            var elem = $(data.elem);
-            var trElem = elem.parents('tr');
-            var tableData = table.cache['grid'];
-            // 更新到表格的缓存数据中，才能在获得选中行等等其他的方法中得到更新之后的值
-            tableData[trElem.data('index')][elem.attr('name')] = data.value;
-            // 其他的操作看需求 TODO
-        });
 
         //删除一行
         $("#btnDelete").click(function() {
@@ -163,10 +154,10 @@
                 layer.msg('请勾选数据', {time: 1000});
             } else {
                 table.reload('grid', {
-                   data: newData
+                    data: newData
                 });
             }
-            
+
             // // 方法二，通过每条记录的唯一id来删除数据
             // var checkStatus = table.checkStatus('grid'); //test即为基础参数id对应的值
             // console.log(checkStatus.data.length);
@@ -203,13 +194,13 @@
             var data1={ id: 20, name: "参数3", city: '北京08', location: 'body' };
             layui.table.cache["grid"].push(data1);
             table.reload('grid', {
-               data: layui.table.cache["grid"]
+                data: layui.table.cache["grid"]
             });
 
-           // layui.table.cache["grid"].push(data1);
-           //  table.reload('grid', {
-           //     data : layui.table.cache["grid"]
-           //  });
+            // layui.table.cache["grid"].push(data1);
+            //  table.reload('grid', {
+            //     data : layui.table.cache["grid"]
+            //  });
         });
 
         var tableIns = table.render({
@@ -233,57 +224,39 @@
                 {field: 'name', title: '参数名', fixed: true, edit: 'text'},
                 {field: 'describe', title: '参数描述', fixed: true, edit: 'text'},
                 {
-                    field: 'pageParamType', 
-                    title: '页面传参类型', 
-                    align: 'center',
-                    templet: function (d) {
-                        // 模板的实现方式也是多种多样，这里简单返回固定的
-                        return '<select name="pageParamType" lay-filter="selectPageParamType" lay-verify="required" data-value="' + d.pageParamType + '" >\n' +
-                               '    <option value="String">String</option>\n' +
-                               '    <option value="Boolean">Boolean</option>\n' +
-                               '    <option value="Integer">Integer</option>\n' +
-                               '    <option value="Long">Long</option>\n' +
-                               '    <option value="Double">Double</option>\n' +
-                               '    <option value="Float">Float</option>\n' +
-                               '    <option value="TimeStamp">TimeStamp</option>\n' +
-                               '    <option value="List">List</option>\n' +
-                               '</select>';
-                    }
-                },
-                {
-                    field: 'paramType', 
-                    title: '转成的参数类型', 
-                    align: 'center',
-                    templet: function (d) {
-                        // 模板的实现方式也是多种多样，这里简单返回固定的
-                        return '<select name="paramType" lay-filter="selectParamType" lay-verify="required" data-value="' + d.paramType + '" >\n' +
-                               '    <option value="String">String</option>\n' +
-                               '    <option value="Boolean">Boolean</option>\n' +
-                               '    <option value="Integer">Integer</option>\n' +
-                               '    <option value="Long">Long</option>\n' +
-                               '    <option value="Double">Double</option>\n' +
-                               '    <option value="Float">Float</option>\n' +
-                               '    <option value="TimeStamp">TimeStamp</option>\n' +
-                               '</select>';
-                    }
-                },
-                {
-                    field: 'location', 
-                    title: '参数位置', 
-                    align: 'center',
+                    field: 'location',
+                    title: '参数位置',
                     templet: function (d) {
                         // 模板的实现方式也是多种多样，这里简单返回固定的
                         return '<select name="location" lay-filter="selectLocation" lay-verify="required" data-value="' + d.location + '" >\n' +
-                               '    <option value="url">url</option>\n' +
-                               '    <option value="body">body</option>\n' +
-                               '    <option value="path">path</option>\n' +
-                               '</select>';
+                            '    <option value="url">url</option>\n' +
+                            '    <option value="body">body</option>\n' +
+                            '    <option value="path">path</option>\n' +
+                            '</select>';
+                    }
+                },
+                {
+                    field: 'paramType',
+                    title: '转成的类型',
+                    templet: function (d) {
+                        // 模板的实现方式也是多种多样，这里简单返回固定的
+                        return '<select name="paramType" lay-filter="selectParamType" lay-verify="required" data-value="' + d.paramType + '" >\n' +
+                            '    <option value="String">String</option>\n' +
+                            '    <option value="TimeStamp">TimeStamp</option>\n' +
+                            '    <option value="Boolean">Boolean</option>\n' +
+                            '    <option value="Integer">Integer</option>\n' +
+                            '    <option value="Long">Long</option>\n' +
+                            '    <option value="Double">Double</option>\n' +
+                            '    <option value="Float">Float</option>\n' +
+                            '    <option value="StringArr">StringArr</option>\n' +
+                            '    <option value="IntegerArr">IntegerArr</option>\n' +
+                            '    <option value="LongArr">LongArr</option>\n' +
+                            '</select>';
                     }
                 },
                 {
                     field: 'city',
                     title: '城市',
-                    align: 'center',
                     templet: function (d) {
                         // 模板的实现方式也是多种多样，这里简单返回固定的
                         return '<select name="city" lay-filter="selectCity" lay-verify="required" data-value="' + d.city + '" >\n' +
@@ -314,6 +287,6 @@
     });
 
 </script>
- 
+
 </body>
 </html>
