@@ -1,9 +1,7 @@
 package com.hegp.core.sql;
 
-import com.github.pagehelper.parser.CountSqlParser;
-import com.github.pagehelper.parser.SqlServerParser;
-
 /**
+ * 整个SQL分页解析的代码都是参考 implementation 'com.github.pagehelper:pagehelper:5.1.11' 的
  * @author hgp
  * @date 20-5-18
  */
@@ -19,37 +17,20 @@ public class PageSql {
     // 原本想直接使用 com.github.pagehelper.dialect.helper 包下的getPageSql()方法,
     // 但是该方法的参数类型是 org.apache.ibatis.cache.CacheKey, 必须引入mybatis的依赖
     // 这段代码都是直接使用 com.github.pagehelper.dialect.helper包下各种语言的分页SQL的逻辑代码
-    public String getPageSql(String sql, String driverType, int startRow, int endRow) {
-        switch (driverType) {
-            case "MYSQL":
+    public String getPageSql(String sql, Dialect dialect, int startRow, int endRow) {
+        switch (dialect) {
+            case MySql:
                 return getMysqlPageSql(sql, startRow, endRow);
-            case "POSTGRESQL":
+            case PostgreSQL:
                 return getPostgresPageSql(sql, startRow, endRow);
-            case "ORACLE":
+            case Oracle:
                 return getOraclePageSql(sql, startRow, endRow);
-            case "DB2":
-                getDB2PageSql(sql, startRow, endRow);
-            case "SQLSERVER":
-                sqlServerParser.convertToPageSql(sql, startRow, endRow-startRow);
-            case "IFX":
-                return getIfxDriverPageSql(sql, startRow, endRow);
+            case Db2:
+                return getDB2PageSql(sql, startRow, endRow);
+            case SqlServer:
+                return sqlServerParser.convertToPageSql(sql, startRow, endRow-startRow);
         }
         return sql;
-    }
-
-    public String getIfxDriverPageSql(String sql, int startRow, int endRow) {
-        StringBuilder sqlBuilder = new StringBuilder(sql.length() + 40);
-        sqlBuilder.append("SELECT ");
-        if (startRow > 0) {
-            sqlBuilder.append(" SKIP "+startRow);
-        }
-        if (endRow > 0) {
-            sqlBuilder.append(" FIRST "+endRow);
-        }
-        sqlBuilder.append(" * FROM ( ");
-        sqlBuilder.append(sql);
-        sqlBuilder.append(" ) TEMP_T ");
-        return sqlBuilder.toString();
     }
 
     public String getDB2PageSql(String sql, int startRow, int endRow) {
@@ -94,29 +75,33 @@ public class PageSql {
     }
 
     public static void main(String[] args) {
-        String[] driverTypes = new String[] {
-            "MYSQL",
-            "POSTGRESQL",
-            "ORACLE",
-            "DB2",
-            "SQLSERVER",
-            "IDX"
+        String sql = "SELECT * FROM sys_user ORDER BY username";
+        printSQL(sql, 0, 10);
+        printSQL(sql, 90, 100);
+
+        sql = "SELECT * FROM sys_user GROUP BY username ORDER BY username";
+        printSQL(sql, 0, 10);
+        printSQL(sql, 90, 100);
+
+        sql = "SELECT * FROM sys_user WHERE nickname LIKE :nickname GROUP BY username ORDER BY username";
+        printSQL(sql, 0, 10);
+        printSQL(sql, 90, 100);
+    }
+
+    private static void printSQL(String sql, int startRow, int endRow) {
+        PageSql pageSql = new PageSql();
+        Dialect[] dialects = new Dialect[] {
+                Dialect.MySql,
+                Dialect.PostgreSQL,
+                Dialect.Oracle,
+                Dialect.SqlServer,
+                Dialect.Db2
         };
 
-        PageSql pageSql = new PageSql();
-        String sql = "SELECT * FROM sys_user ORDER BY username";
-        int startRow = 0;
-        int endRow = 10;
-        for (String driverType:driverTypes) {
-            System.out.println(driverType+"  ==>>  " + pageSql.getPageSql(sql, driverType, startRow, endRow));
+        for (Dialect dialect:dialects) {
+            System.out.println(dialect.getValue()+"  ==>>  " + pageSql.getPageSql(sql, dialect, startRow, endRow));
         }
-
+        System.out.println(pageSql.getCountSql(sql));
         System.out.println("\n\n\n");
-
-        startRow = 90;
-        endRow = 100;
-        for (String driverType:driverTypes) {
-            System.out.println(driverType+"  ==>>  " + pageSql.getPageSql(sql, driverType, startRow, endRow));
-        }
     }
 }
