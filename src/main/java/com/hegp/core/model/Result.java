@@ -1,8 +1,5 @@
 package com.hegp.core.model;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import org.springframework.util.StringUtils;
-
 import java.io.Serializable;
 
 /**
@@ -17,12 +14,8 @@ public class Result<T> implements Serializable {
 
     private static final long serialVersionUID = -4254726102616289056L;
     private Integer code;		// 响应业务状态
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String msg;         // 短信服务返回的是这个字段
-    private String message;		// 响应消息
-    private T result;		    // 响应中的数据
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private T data;
+    private T data;		    // 响应中的数据
 
     public Result(){ }
 
@@ -44,22 +37,6 @@ public class Result<T> implements Serializable {
 
     public void setMsg(String msg) {
         this.msg = msg;
-    }
-
-    public String getMessage() {
-        return StringUtils.hasText(this.message)? this.message:this.msg;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public T getResult() {
-        return this.result!=null? this.result:this.data;
-    }
-
-    public void setResult(T result) {
-        this.result = result;
     }
 
     public T getData() {
@@ -98,15 +75,13 @@ public class Result<T> implements Serializable {
         return new Result(499, msg, null);
     }
 
-    public Result(Integer code, String message, T result) {
+    public Result(Integer code, String msg, T result) {
         this.code = code;
-        this.message = message;
-        this.result = result;
+        this.msg = msg;
     }
 
-    public Result(String message, T result) {
-        this.message = message;
-        this.result = result;
+    public Result(String msg) {
+        this.msg = msg;
     }
 
 }

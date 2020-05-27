@@ -38,7 +38,7 @@
         <li lay-id="44">商品管理</li>
         <li lay-id="55">订单管理</li>
     </ul>
-    <div class="layui-tab-content">
+    <div class="layui-tab-content" style="height: 100%; width: 200%">
         <div class="layui-tab-item layui-show">内容1</div>
         <div class="layui-tab-item">内容2</div>
         <div class="layui-tab-item">内容3</div>
@@ -59,7 +59,7 @@
         //新增一个Tab项
         element.tabAdd('demo', {
             title: '新选项'+ (Math.random()*1000|0) //用于演示
-            ,content: '<button class="layui-btn">新增Tab项</button>'
+            ,content: '<iframe src="./dynamicTable.html"></iframe>'
             ,id: new Date().getTime() //实际使用一般是规定好的id，这里以时间戳模拟下
         })
     }

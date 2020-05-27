@@ -81,4 +81,13 @@ public class SqlTemplateController extends BaseValidate {
     public Result<Map> queryList() {
         return Result.success(sqlTemplateService.queryTreeListData());
     }
+
+    /**
+     * 返回list集合,然后ztree自动封装list成树状结构
+     * @return
+     */
+    @GetMapping("/test")
+    public Result testtest() {
+        return Result.success();
+    }
 }
