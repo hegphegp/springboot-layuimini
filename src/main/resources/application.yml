@@ -2,9 +2,9 @@ spring:
   application:
     name: hgp-admin
   datasource:
-    username: root
-    password: icityDB2018!@#
-    url: jdbc:postgresql://192.168.4.151:5432/icity
+    username: sde
+    password: postgres
+    url: jdbc:postgresql://localhost:5432/postgres
     driver-class-name: org.postgresql.Driver
     type: com.zaxxer.hikari.HikariDataSource
     hikari:
@@ -27,10 +27,11 @@ spring:
       max-request-size: 100MB
   redis:
     database: 0
-    host: 192.168.4.151
+    host: localhost
     port: 6379
-    password: icityRedis2020!@#
+    password: admin
     timeout: 5000ms
 
-service.base-url.prefix: /v1/service
+rate-limiter.one-second.limit: 1000
+rate-limiter.one-second.one-url.limit: 100
 

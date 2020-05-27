@@ -41,11 +41,10 @@ public class RateLimiterFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         // 全局限流
-        boolean result = rateLimiter.tryAcquire(500, TimeUnit.MICROSECONDS);
+        // 等待20毫秒
+        boolean result = rateLimiter.tryAcquire(20, TimeUnit.MICROSECONDS);
         if (result==false) {
-            response.setStatus(500);
-            response.setContentType("application/json; charset=utf-8");
-            response.getWriter().write(errorMsg);
+            assemblyResponse(response);
             logger.error("触发全局限流");
             return;
         }
@@ -53,19 +52,26 @@ public class RateLimiterFilter extends OncePerRequestFilter {
         // 单个URL限流
         String url = request.getRequestURI();
         if (urlRateMap.get(url) == null) {
-            urlRateMap.put(url, RateLimiter.create(oneSecondOneUrlRateLimiter));
+            synchronized (RateLimiterFilter.class) {
+                if (urlRateMap.get(url) == null) {
+                    urlRateMap.put(url, RateLimiter.create(oneSecondOneUrlRateLimiter));
+                }
+            }
         }
         RateLimiter urlRateLimiter = urlRateMap.get(url);
-        // 等待500毫秒
-        result = urlRateLimiter.tryAcquire(500, TimeUnit.MICROSECONDS);
+        // 等待20毫秒
+        result = urlRateLimiter.tryAcquire(20, TimeUnit.MICROSECONDS);
         if (result==false) {
-            response.setStatus(500);
-            response.setContentType("application/json; charset=utf-8");
-            response.getWriter().write(errorMsg);
+            assemblyResponse(response);
             logger.error("触发URL限流");
             return;
         }
         filterChain.doFilter(request, response);
     }
 
+    private void assemblyResponse(HttpServletResponse response) throws IOException {
+        response.setStatus(500);
+        response.setContentType("application/json; charset=utf-8");
+        response.getWriter().write(errorMsg);
+    }
 }

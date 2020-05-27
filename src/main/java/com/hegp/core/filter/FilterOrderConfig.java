@@ -11,16 +11,15 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class FilterOrderConfig {
-    @Value("${rate-limiter.one-second.limit:1}")
-    private Double oneSecondRateLimiter = 1000D;
-    @Value("${rate-limiter.one-second.one-url.limit:1}")
-    private Double oneSecondOneUrlRateLimiter = 100D;
+    @Value("${rate-limiter.one-second.limit:1000}")
+    private Double oneSecondRateLimiter = 1000d;
+    @Value("${rate-limiter.one-second.one-url.limit:100}")
+    private Double oneSecondOneUrlRateLimiter = 100d;
 
     @Bean
     public FilterRegistrationBean<RateLimiterFilter> rateLimiterFilter() {
         FilterRegistrationBean registration = new FilterRegistrationBean();
         registration.setFilter(new RateLimiterFilter(oneSecondRateLimiter, oneSecondOneUrlRateLimiter));
-        registration.addUrlPatterns("/*");
         registration.setName("rateLimiterFilter");
         registration.setOrder(Integer.MIN_VALUE);
         return registration;
