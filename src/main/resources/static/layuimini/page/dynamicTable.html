@@ -65,7 +65,7 @@
     </div>
     <div class="layui-row">
         <table id="grid" lay-filter="grid"></table>
-        <textarea name="content" id="demo" placeholder="请输入SQL语句，该模板由freemarker模板引擎解析" class="layui-textarea" lay-verify="content" rows="20" style="margin-top: 10px;"></textarea>
+        <textarea name="content" id="demo" lay-verify="required" placeholder="请输入SQL语句，该模板由freemarker模板引擎解析" class="layui-textarea" lay-verify="content" rows="20" style="margin-top: 10px;"></textarea>
     </div>
 </form>
 </div>
@@ -103,7 +103,6 @@
             return false;
         });
 
-        // layui.form.render('select','methodSelect');
         var check = 0;
         //监听单元格编辑
         table.on('edit(grid)', function(obj) {

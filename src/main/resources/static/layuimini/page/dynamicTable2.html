@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>layui</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="https://www.layuicdn.com/layui-v2.5.6/css/layui.css" media="all">
+    <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+    <style type="text/css">
+        /* 防止下拉框下拉值被遮盖*/
+        .layui-table-cell, .layui-table-box, .layui-table-body {
+            overflow: visible;
+        }
+        .layui-table-view .layui-table td, .layui-table-view .layui-table th {
+            padding: 0;
+        }
+        .layui-table, .layui-table-view {
+            margin: 0;
+        }
+        .layui-input, .layui-input-block {
+            height: 28px;
+        }
+        .layui-form-select dl {
+            z-index: 9000;
+            padding: 0;
+            top: 28px;
+        }
+        .layui-form-select dl dd, .layui-form-select dl dt {
+            z-index: 9000;
+            line-height: 20px;
+        }
+        .layui-form-label {
+            padding: 2px 15px;
+        }
+    </style>
+</head>
+<body marginwidth="0" marginheight="0">
+<div>
+<form class="layui-form" id="submitform">
+    <div class="layui-row">
+        <button class="layui-btn layui-btn-sm" lay-submit="" lay-filter="submitUpdate">获得所有数据</button>
+        <button class="layui-btn layui-btn-sm" lay-submit="" lay-filter="btnAdd">新增一行</button>
+        <button class="layui-btn layui-btn-sm" lay-submit="" lay-filter="btnDelete">删除选中一行</button>
+    </div>
+    <div class="layui-row">
+        <div class="layui-col-xs2 layui-col-sm2 layui-col-md2 layui-col-lg2">
+            <select name="method" lay-filter="method" lay-verify="required" data-value="GET">
+                <option value="GET">GET</option>
+                <option value="POST">POST</option>
+                <option value="PUT">PUT</option>
+                <option value="PATCH">PATCH</option>
+                <option value="DELETE">DELETE</option>
+            </select>
+        </div>
+        <div class="layui-col-xs10 layui-col-sm10 layui-col-md10 layui-col-lg10">
+            <div>
+                <label class="layui-form-label">URL地址</label>
+                <div class="layui-input-block">
+                    <input type="text" name="username" lay-verify="required" lay-reqtext="用户名是必填项，岂能为空？" placeholder="请输入" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-row">
+        <table id="grid" lay-filter="grid"></table>
+        <textarea name="content" id="demo" lay-verify="required" placeholder="请输入SQL语句，该模板由freemarker模板引擎解析" class="layui-textarea" lay-verify="content" rows="20" style="margin-top: 10px;"></textarea>
+    </div>
+</form>
+</div>
+<script src="https://www.layuicdn.com/layui-v2.5.6/layui.all.js" charset="utf-8"></script>
+<!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+ 
+<script>
+    layui.use(['table', 'layer', 'element', 'jquery', 'form'], function (table, layer, element, $, form) {
+        var jsonData = [
+            { id: 1, name: "参数1", city: '北京09', location: 'url' },
+            { id: 3, location: 'path' }
+        ];
+ 
+        //监听提交
+        form.on('submit(submitUpdate)', function(data) {
+            var formData = {};
+            var originData = $('#submitform').serializeArray();
+            $.each(originData, function() {
+                if (this.name=="name"||this.name=="url"||this.name=="content") {
+                    formData[this.name] = this.value;
+                }
+            });
+
+            formData["params"]=layui.table.cache["grid"];
+            layer.msg(JSON.stringify(formData), {
+                time: 1500
+            });
+            return false;
+        });
+
+        var check = 0;
+        //监听单元格编辑
+        table.on('edit(grid)', function(obj) {
+            var value = obj.value //得到修改后的值
+            ,data = obj.data      //得到所在行所有键值
+            ,field = obj.field;   //得到字段
+            if ("describe"==field) { // 校验table编辑的describe字段
+                console.log(field);
+            }
+            if ((check++)%2==0) { // 表示校验不通过
+                layer.msg('校验不通过', {time: 1000});
+                $(".layui-table-edit").val($(this).prev().text()); // 赋予之前的旧值
+            }
+        });
+
+        function updateSelectData(tableName, data) {
+            var elem = $(data.elem);
+            var trElem = elem.parents('tr');
+            var tableData = table.cache[tableName];
+            // 更新到表格的缓存数据中，才能在获得选中行等等其他的方法中得到更新之后的值
+            tableData[trElem.data('index')][elem.attr('name')] = data.value;
+            // 其他的操作看需求 TODO
+        }
+        // 监听修改update到表格中
+        form.on('select(selectLocation)', function (data) {
+            updateSelectData('grid', data);
+        });
+        // 监听修改update到表格中
+        form.on('select(selectParamType)', function (data) {
+            updateSelectData('grid', data);
+        });
+        // 监听修改update到表格中
+        form.on('select(selectCity)', function (data) {
+            updateSelectData('grid', data);
+        });
+
+        //删除选中行
+        form.on('submit(btnDelete)', function(data) {
+            // 通过下标index选出被删除的行
+            var data = layui.table.cache["grid"];
+            var newData = [], delData = [];
+
+            for (var i=0; i<data.length; i++) {
+                var checked = data[i].LAY_CHECKED;
+                (checked==null || checked==undefined)? newData.push(data[i]):delData.push(data[i]);
+            }
+            (delData.length==0)? layer.msg('请勾选数据', {time: 1000}): table.reload('grid', { data: newData });
+            return false;
+        });
+
+        //新增一行
+        form.on('submit(btnAdd)', function(data) {
+            // var item={ id: 20, name: "参数3", city: '北京08', location: 'body' };
+            var item = {};
+            layui.table.cache["grid"].push(item);
+            table.reload('grid', {
+               data: layui.table.cache["grid"]
+            });
+           return false;
+        });
+
+        var selectCityData = [{"id":"北京01","value":"北京01"},{"id":"北京02","value":"北京02"},{"id":"北京03","value":"北京03"},{"id":"北京04","value":"北京04"},{"id":"北京05","value":"北京05"},
+            {"id":"北京06","value":"北京06"},{"id":"北京07","value":"北京07"},{"id":"北京08","value":"北京08"},{"id":"北京09","value":"北京09"},{"id":"北京10","value":"北京10"},{"id":"北京11","value":"北京11"},
+            {"id":"北京12","value":"北京12"},{"id":"北京13","value":"北京13"},{"id":"北京14","value":"北京14"},{"id":"北京15","value":"北京15"},{"id":"北京16","value":"北京16"},{"id":"北京17","value":"北京17"}];
+        var selectParamTypeData = [{"id":"String","value":"String"},{"id":"TimeStamp","value":"TimeStamp"},{"id":"Boolean","value":"Boolean"},{"id":"Integer","value":"Integer"},{"id":"Long","value":"Long"},
+            {"id":"Double","value":"Double"},{"id":"Float","value":"Float"},{"id":"StringArr","value":"StringArr"},{"id":"IntegerArr","value":"IntegerArr"},{"id":"LongArr","value":"LongArr"}];
+        table.render({
+            elem: '#grid',
+            // width: 600,
+            // height: 30000,
+            limit: 1000,
+            data: jsonData,
+            size: 'md',
+            cols: [[ //表头
+                {type: 'checkbox', fixed: true},
+                {field: 'name', title: '参数名', fixed: true, edit: 'text'},
+                {field: 'describe', title: '参数描述', fixed: true, edit: 'text'},
+                {
+                    field: 'location', 
+                    title: '参数位置', 
+                    templet: function (d) { // 模板的实现方式也是多种多样，这里简单返回固定的
+                        return '<select name="location" lay-filter="selectLocation" data-value="' + d.location + '" >\n' +
+                               '    <option value="url">url</option>\n' +
+                               '    <option value="body">body</option>\n' +
+                               '    <option value="path">path</option>\n' +
+                               '</select>';
+                    }
+                },
+                {
+                    field: 'paramType', 
+                    title: '转成的类型', 
+                    templet: function (d) { // 模板的实现方式也是多种多样，这里简单返回固定的
+                        var html = '<select name="paramType" lay-filter="selectParamType" data-value="' + d.paramType + '" >';
+                        $.each(selectParamTypeData, function(index, item) {
+                            html+="<option value='"+item.id+"'>"+item.value+"</option>";
+                        });
+                        return html+"</select>";
+                    }
+                },
+                {
+                    field: 'city',
+                    title: '城市',
+                    templet: function (d) { // 模板的实现方式也是多种多样，这里简单返回固定的
+                        var html = '<select name="city" lay-filter="selectCity" data-value="' + d.city + '" >';
+                        $.each(selectCityData, function(index, item) {
+                            html+="<option value='"+item.id+"'>"+item.value+"</option>";
+                        });
+                        return html+"</select>";
+                    }
+                }
+            ]]
+        });
+    });
+
+</script>
+ 
+</body>
+</html>
