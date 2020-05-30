@@ -22,8 +22,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class RateLimiterFilter extends OncePerRequestFilter {
 
-    private String errorMsg = "{\"code\":500,\"msg\":\"限流\"}";
-
+    private byte[] errorMsgBytes = "{\"code\":500,\"msg\":\"限流\"}".getBytes();
     private Double oneSecondOneUrlRateLimiter;
 
     //存入URL 和 rateLimiter 的实列，保证 每个请求都是单列的
@@ -42,7 +41,7 @@ public class RateLimiterFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
         // 全局限流
         // 等待20毫秒
-        boolean result = rateLimiter.tryAcquire(20, TimeUnit.MICROSECONDS);
+        boolean result = rateLimiter.tryAcquire(1, TimeUnit.MICROSECONDS);
         if (result==false) {
             assemblyResponse(response);
             logger.error("触发全局限流");
@@ -60,7 +59,7 @@ public class RateLimiterFilter extends OncePerRequestFilter {
         }
         RateLimiter urlRateLimiter = urlRateMap.get(url);
         // 等待20毫秒
-        result = urlRateLimiter.tryAcquire(20, TimeUnit.MICROSECONDS);
+        result = urlRateLimiter.tryAcquire(1, TimeUnit.MICROSECONDS);
         if (result==false) {
             assemblyResponse(response);
             logger.error("触发URL限流");
@@ -72,6 +71,6 @@ public class RateLimiterFilter extends OncePerRequestFilter {
     private void assemblyResponse(HttpServletResponse response) throws IOException {
         response.setStatus(500);
         response.setContentType("application/json; charset=utf-8");
-        response.getWriter().write(errorMsg);
+        response.getOutputStream().write(errorMsgBytes);
     }
 }
