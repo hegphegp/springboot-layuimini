@@ -24,13 +24,6 @@
             line-height: 28px;
             border:2px solid #fff;
         }
-        .layui-tab-title li .layui-tab-close {
-            margin-left: 0px;
-            color: #fff;
-        }
-        .layui-tab-card>.layui-tab-title .layui-this {
-            background-color: #5FB878;
-        }
         .layui-tab .layui-tab-content{
             height: calc(100% - 37px) !important;
         }
@@ -151,7 +144,7 @@
         }
 
         function showRemoveBtn(treeId, treeNode) {
-            return treeNode.children==null;;
+            return treeNode.children==null;
         }
 
         var newCount = 1;
@@ -162,12 +155,19 @@
             sObj.after(addStr);
             var btn = $("#addBtn_" + treeNode.tId);
             if (btn) btn.bind("click", function() {
-                var zTree = $.fn.zTree.getZTreeObj("treeDemo");
-                zTree.addNodes(treeNode, {
-                    id: (100 + newCount),
-                    pId: treeNode.id,
-                    name: "new node" + (newCount++)
+                layer.open({
+                    type: 1, //layer提供了5种层类型。可传入的值有：0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）
+                    title: "修改采集设备信息",
+                    area: ['320px', '200px'],
+                    content: $("#addTreeItem")//引用的弹出层的页面层的方式加载修改界面表单
                 });
+
+                // var zTree = $.fn.zTree.getZTreeObj("treeDemo");
+                // zTree.addNodes(treeNode, {
+                //     id: (100 + newCount),
+                //     pId: treeNode.id,
+                //     name: "new node" + (newCount++)
+                // });
                 // console.log(JSON.stringify(assemblyTreeData(zTree.getNodes()))+"\n\n\n");
                 return false;
             });
@@ -183,13 +183,19 @@
 
         // 添加顶层节点
         function addTopLevelNode() {
+            layer.open({
+                type: 1, //layer提供了5种层类型。可传入的值有：0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）
+                title: "修改采集设备信息",
+                area: ['320px', '200px'],
+                content: $("#addTreeItem")//引用的弹出层的页面层的方式加载修改界面表单
+            });
             var zTree = $.fn.zTree.getZTreeObj("treeDemo");
             zTree.addNodes(null, {
                 id: (100 + newCount),
                 pId: null,
                 name: "new node" + (newCount++)
             });
-            layer.msg("点击事件");
+            // layer.msg("点击事件");
         }
 
         function assemblyTreeData(treeNodes) {
@@ -208,11 +214,30 @@
             }
             return newTreeNodes;
         }
+
+        var element = layui.element; //Tab的切换功能，切换事件监听等，需要依赖element模块
+        function tabAdd() {
+            //新增一个Tab项
+            var id = new Date().getTime();
+            element.tabAdd('tabPane', {
+                title: '新选项'+ (Math.random()*1000|0) //用于演示
+                ,content: '<iframe frameborder="0" height="100%" width="100%" scrolling="auto" src="./dynamicTable.html"></iframe>'
+                ,id: id  //实际使用一般是规定好的id，这里以时间戳模拟下
+            });
+            element.tabChange('tabPane', id);
+        }
+
+        //新增一行
+        form.on('submit(demo11)', function(data) {
+            parent.layer.closeAll();
+            $("#addTreeItem").attr("style","display:none;");//隐藏div
+            return false;
+        });
     </script>
 </head>
 <body>
-<div style="padding: 2px 15px;">
-    <button type="button" class="layui-btn layui-btn-xs" onclick="addTopLevelNode()">添加根节点</button>
+<div style="padding:8px 8px;">
+    <button type="button" class="layui-btn layui-btn-xs" onclick="addTopLevelNode()" style="margin-bottom:8px;">添加根节点</button>
     <ul id="treeDemo" class="ztree" style="width: 265px;"></ul>
 </div>
 <div class="layui-body">
@@ -220,27 +245,29 @@
         <button class="layui-btn site-demo-active" onclick="tabAdd()">新增Tab项</button>
     </div>
 
-    <div class="layui-tab layui-tab-card" lay-filter="demo" lay-allowclose="true" style="height: 100%;margin: 0px;overflow: hidden;">
+    <div class="layui-tab layui-tab-card" lay-filter="tabPane" lay-allowclose="true" style="height: 100%;margin: 0px;overflow: hidden;">
         <ul class="layui-tab-title"></ul>
         <div class="layui-tab-content"></div>
     </div>
 </div>
-<script src="https://www.layuicdn.com/layui-v2.5.6/layui.all.js" charset="utf-8"></script>
-<script>
-    var $ = layui.$;
-    var element = layui.element; //Tab的切换功能，切换事件监听等，需要依赖element模块
-    function tabAdd() {
-        //新增一个Tab项
-        var id = new Date().getTime();
-        element.tabAdd('demo', {
-            title: '新选项'+ (Math.random()*1000|0) //用于演示
-            ,content: '<iframe frameborder="0" height="100%" width="100%" scrolling="auto" src="./dynamicTable.html"></iframe>'
-            ,id: id  //实际使用一般是规定好的id，这里以时间戳模拟下
-        });
-        element.tabChange('demo', id);
-    }
+<div class="layui-row" id="addTreeItem" style="display:none;">
+    <div class="layui-col-md10">
+        <form class="layui-form layui-from-pane" action="" style="margin-top:20px" >
+            <div class="layui-form-item">
+                <label class="layui-form-label">节点名称</label>
+                <div class="layui-input-block">
+                    <input type="text" name="neweqptName"  required  lay-verify="required" autocomplete="off" placeholder="请输入采集设备名称" class="layui-input">
+                </div>
+            </div>
 
-</script>
+            <div class="layui-form-item" style="margin-top:40px">
+                <div class="layui-input-block">
+                    <button class="layui-btn  layui-btn-submit " lay-submit="" lay-filter="demo11">确认</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 
 </body>
 </html>
