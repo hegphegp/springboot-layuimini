@@ -19,6 +19,8 @@ public class PageSql {
     // 这段代码都是直接使用 com.github.pagehelper.dialect.helper包下各种语言的分页SQL的逻辑代码
     public String getPageSql(String sql, Dialect dialect, int startRow, int endRow) {
         switch (dialect) {
+            case H2:
+                return getMysqlPageSql(sql, startRow, endRow-startRow);
             case MySql:
                 return getMysqlPageSql(sql, startRow, endRow);
             case PostgreSQL:
@@ -95,7 +97,8 @@ public class PageSql {
                 Dialect.PostgreSQL,
                 Dialect.Oracle,
                 Dialect.SqlServer,
-                Dialect.Db2
+                Dialect.Db2,
+                Dialect.H2
         };
 
         for (Dialect dialect:dialects) {

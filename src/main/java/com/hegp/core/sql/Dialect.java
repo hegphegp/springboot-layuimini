@@ -1,6 +1,7 @@
 package com.hegp.core.sql;
 
 public enum Dialect {
+    H2("H2"),
     MySql("MySql"),
     Oracle("Oracle"),
     SqlServer("SqlServer"),

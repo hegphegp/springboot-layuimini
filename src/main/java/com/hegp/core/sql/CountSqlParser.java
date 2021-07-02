@@ -210,7 +210,7 @@ public class CountSqlParser {
     public void sqlToCount(Select select, String name) {
         SelectBody selectBody = select.getSelectBody();
         // 是否能简化count查询
-        List<SelectItem> COUNT_ITEM = new ArrayList<SelectItem>();
+        List<SelectItem> COUNT_ITEM = new ArrayList();
         COUNT_ITEM.add(new SelectExpressionItem(new Column("count(" + name +")")));
         if (selectBody instanceof PlainSelect && isSimpleCount((PlainSelect) selectBody)) {
             ((PlainSelect) selectBody).setSelectItems(COUNT_ITEM);
